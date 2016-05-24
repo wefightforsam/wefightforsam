@@ -3,16 +3,16 @@
  setWidth(6)
  setColor(BLACK)
  
- function drawPolygon() {
+ function drawPolygon(numSides) {
     var a;
     a = 0
-    while(a<8){
+    while (a < numSides) {
         fd(90) 
-        rt(360 / 8)
-        a = a+1
+        rt(360 / numSides)
+        a = a + 1
     }
  }
  
  
- drawPolygon();
+ drawPolygon(9);
 </script>
