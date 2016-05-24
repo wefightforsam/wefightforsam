@@ -10,13 +10,14 @@ function drawPolygon(numSides, radius) {
      fd(radius)
      lt(90)
      pd()
-     
+     lt(360/(2*numSides))
      var a = 0
      while (a < numSides) {
         fd(size) 
         lt(360 / numSides)
         a = a + 1
      }
+rt(360/(2*numSides))
 
     pu()
     lt(90)
