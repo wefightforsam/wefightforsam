@@ -2,11 +2,17 @@
  clear(1,.5,.5)
  setWidth(6)
  setColor(BLACK)
- var a;
- a = 0
- while(a<8){
-  fd(90) 
-  rt(360 / 8)
-     a = a+1
+ 
+ function drawPolygon() {
+    var a;
+    a = 0
+    while(a<8){
+        fd(90) 
+        rt(360 / 8)
+        a = a+1
+    }
  }
+ 
+ 
+ drawPolygon();
 </script>
