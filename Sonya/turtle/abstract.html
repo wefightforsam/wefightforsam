@@ -1,19 +1,31 @@
 <script src="https://codeheart.williams.edu/turtle/turtle.min.js?">-*- javascript -*-</script><script>
- clear(1,.5,.5)
- setWidth(6)
- setColor(BLACK)
+clear(1,.5,.5)
+setWidth(6)
+setColor(BLACK)
  
- function drawPolygon(numSides,size) {
-    var a;
-    a = 0
-    while (a < numSides) {
+function drawPolygon(numSides, radius) {
+     var size = radius * 2 * sin(Math.PI / (2 * numSides))
+     pu()
+     rt(90)
+     fd(radius)
+     lt(90)
+     pd()
+     
+     var a = 0
+     while (a < numSides) {
         fd(size) 
         rt(360 / numSides)
         a = a + 1
-    }
- }
+     }
+
+    pu()
+    lt(90)
+    bk(radius)
+    rt(90)
+    pd()
+}
  
- drawPolygon(9,100);
+drawPolygon(9,100);
  
- drawPolygon(9,150);
+drawPolygon(9,130);
 </script>
