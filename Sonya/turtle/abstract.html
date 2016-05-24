@@ -4,7 +4,7 @@ setWidth(6)
 setColor(BLACK)
  
 function drawPolygon(numSides, radius) {
-     var size = radius * 2 * sin(Math.PI / (2 * numSides))
+     var size = radius * 2 * sin(Math.PI /  numSides)
      pu()
      rt(90)
      fd(radius)
@@ -28,5 +28,5 @@ rt(360/(2*numSides))
  
 drawPolygon(9,130);
  
-drawPolygon(9,200);
+drawPolygon(9,220);
 </script>
