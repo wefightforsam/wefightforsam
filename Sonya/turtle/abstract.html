@@ -17,19 +17,22 @@ function drawPolygon(numSides, radius) {
         lt(360 / numSides)
         a = a + 1
      }
-rt(360/(2*numSides))
+     rt(360/(2*numSides))
 
-    pu()
-    lt(90)
-    fd(radius)
-    rt(90)
-    pd()
+     pu()
+     lt(90)
+     fd(radius)
+     rt(90)
+     pd()
 }
 
-
+setSpeed(10)
 var v = 0
-while (v < 15 ) {
-    drawPolygon(9, 60 + v * 20);
+while (v < 15) {
+    drawPolygon(9, 60 + v * 20)
     v = v + 1
 }
+
+
+
 </script>
