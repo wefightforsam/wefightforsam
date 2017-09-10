@@ -3,7 +3,7 @@ version 8
 __lua__
 dn, lt, up, rt = 0, 1, 2, 3 
 
-cat = {
+cat_array = {{
  x = 60,
  y = 90,
  
@@ -13,15 +13,37 @@ cat = {
  speed = 0.5,
  
  -- direction
- dir = up
-}
+ dir = up,
+ class = "cat",
+ name = "p\69\65\82\76" -- "pearl",
+},
+{
+ x = 90,
+ y = 90,
+ f = 1,
+ speed = 0.5,
+ dir = rt,
+ class = "cat",
+ name = "c\76\79\85\68" -- "cloud"
+},
+{
+ x = 20,
+ y = 90,
+ f = 2,
+ speed = 0.5,
+ dir = rt,
+ class = "cat",
+ name = "l\69\86\73" -- "levi"
+}}
 
 
 function _draw()
 
  -- wall
  cls(15)
-
+ 
+ -- window
+ spr(12, 30, 8, 4, 4)
  local wall_bottom = 64
  
  -- floor
@@ -42,80 +64,154 @@ function _draw()
                {32, 34, 36, 34},
                {64, 66, 68, 66},
                {32, 32, 34, 32}}
- palt(0,false)
- palt(12,true)
+ palt(0,false)palt(12,true)
  
  -- draw shadow
- if cat.dir == up or cat.dir == dn then
-  spr(22, cat.x - 8, cat.y + 2, 2, 1)
- else
-  spr(54, cat.x - 8, cat.y + 2, 2, 1, cat.dir == rt) 
+ for cat in all(cat_array) do
+  if cat.class == "cat" then
+   if cat.dir == up or cat.dir == dn then
+    spr(22, cat.x - 8, cat.y + 2, 2, 1)
+   else
+    spr(54, cat.x - 8, cat.y + 2, 2, 1, cat.dir == rt) 
+   end
+  end
  end
  
- -- draw cat
- spr(anim[cat.dir + 1][flr(cat.f) + 1], cat.x - 8, cat.y - 8, 2, 2, cat.dir == rt)
+ -- draw cats
+ for cat in all(cat_array) do
+  palt(0,false)palt(12,true)
+  if (cat.class == "cat") spr(anim[cat.dir + 1][flr(cat.f) + 1], cat.x - 8, cat.y - 8, 2, 2, cat.dir == rt)
+  pal()
+ end
+
+ -- names
+ for cat in all(cat_array) do
+  if (cat.class == "cat") print(cat.name, cat.x - 8, cat.y - 16, 0)
+ end
 end
 
 
 function _update60()
- cat.f = (cat.f + cat.speed / 2) % 3
- 
- if cat.dir == dn then
-  cat.y += cat.speed
- elseif cat.dir == rt then
-  cat.x += cat.speed
- elseif cat.dir == up then
-  cat.y -= cat.speed
- else
-  cat.x -= cat.speed
+ for cat in all(cat_array) do
+  if cat.class == "cat" then
+   cat.f = (cat.f + cat.speed / 2) % 3
+  
+   if cat.dir == dn then
+    cat.y += cat.speed
+   elseif cat.dir == rt then
+    cat.x += cat.speed
+   elseif cat.dir == up then
+    cat.y -= cat.speed
+   else
+    cat.x -= cat.speed
+   end
+
+   if rnd() < 0.05 then
+    cat.dir = flr(rnd(4))
+   end
+
+   cat.x = max(0,min(cat.x,128))
+   cat.y = max(64,min(cat.y,128))
+  
+   if rnd() < 0.01 then
+    cat.speed = 0
+   elseif rnd() < 0.01 then
+    cat.speed = 0.5
+   end  
+  end 
+  cat.key = cat.y
  end
 
- if (btnp(0)) cat.dir = lt 
- if (btnp(1)) cat.dir = rt 
- if (btnp(2)) cat.dir = up 
- if (btnp(3)) cat.dir = dn 
- 
- if rnd() < 0.05 then
-  cat.dir = flr(rnd(4))
- end
-
- cat.x = max(0,min(cat.x,128))
- cat.y = max(64,min(cat.y,128))
+ sort(cat_array) 
 end
 
+
+-- dad's (casualeffects) optimized
+-- heap sort, based on the graphicscodex.com
+-- implementation. current fastest pico-8 sort
+function sort(data)
+ local n = #data
+
+ -- form a max heap
+ for i = flr(n / 2) + 1, 1, -1 do
+  -- m is the index of the max child
+  local parent, value, m = i, data[i], i + i
+  local key = value.key 
+  
+  while m <= n do
+   -- find the max child
+   if ((m < n) and (data[m + 1].key > data[m].key)) m += 1
+   local mval = data[m]
+   if (key > mval.key) break
+   data[parent] = mval
+   parent = m
+   m += m
+  end
+  data[parent] = value
+ end 
+
+ -- read out the values,
+ -- restoring the heap property
+ -- after each step
+ for i = n, 2, -1 do
+  -- swap root with last
+  local value = data[i]
+  data[i], data[1] = data[1], value
+
+  -- restore the heap
+  local parent, terminate, m = 1, i - 1, 2
+  local key = value.key 
+  
+  while m <= terminate do
+   local mval = data[m]
+   local mkey = mval.key
+   if (m < terminate) and (data[m + 1].key > mkey) then
+    m += 1
+    mval = data[m]
+    mkey = mval.key
+   end
+   if (key > mkey) break
+   data[parent] = mval
+   parent = m
+   m += m
+  end  
+  
+  data[parent] = value
+ end
+end
 __gfx__
-ccccccccccccccccccc55ccccc55cccccccccccccccccccccccccccccccccccccccccccccccc00009f94ff94f994ff9400000000000000000000000000000000
-ccc55ccccc55ccccccc165ccc561ccccccc55ccccc55cccccccccccccccccccccccccccccccc0000ff94ff94ff94fff400000000000000000000000000000000
-ccc165ccc561ccccccc1e61516e1ccccccc165ccc561cccccccccccccccccccccccccccccccc0000f9f49f94ff949ff400000000000000000000000000000000
-ccc1e61516e1ccccccc5e67776e5ccccccc1e61516e1cccccccccccccccccccccccccccccccc0000f9f4999444449f9400000000000000000000000000000000
-ccc5e67776e5ccccccc167777761ccccccc5e67776e5cccccccccccccccccccccccccccccccc000099f49994f9f49f9400000000000000000000000000000000
-ccc167777761ccccccc177777771ccccccc167777761cccccccccccccccccccccccccccccccc000099f4f9f4f9f49f9400000000000000000000000000000000
-ccc177777771ccccccc176777671ccccccc177777771cccccccccccccccccccccccccccccccc00004444f9f499f49f9400000000000000000000000000000000
-ccc176777671ccccccc161777161ccccccc176777671cccccccccccccccccccccccccccccccc0000fff4f9f499f49f9400000000000000000000000000000000
-ccc161777161cccccc55776167755cccccc161777161ccccccccccccccccccccccccccccccccccccf9f49ff49ff49ff400000000000000000000000000000000
-cc55776167755cccccc516777615cccccc55776167755cccccccccccccccccccccccccccccccccccf9f49ff49f94444400000000000000000000000000000000
-cc151677761d1ccccc1dd15551dd1ccccc1d167776151ccccccc1111111cccccccccccccccccccccf9949ff49f94f9f400000000000000000000000000000000
-cc15d15551d61ccccc15d77777d51ccccc16d15551d51ccccc11111111111cccccccccccccccccccf994fff4ff94f9f400000000000000000000000000000000
-cc1d6777666d1ccccc1d6677766d1ccccc1d6667776d1cccccc111111111ccccccccccccccccccccf9944444ff94f9f400000000000000000000000000000000
-ccc17d1115d1ccccccc16d111d61ccccccc1d5111d71ccccccc111111111cccccccccccccccccccc9f94f9f4f9f4f9f400000000000000000000000000000000
-ccc176515d51ccccccc1d65156d1ccccccc15d515671cccccccc1111111ccccccccccccccccccccc9f94f9f4f994f9f400000000000000000000000000000000
-cccc1111111ccccccccc1111111ccccccccc1111111ccccccccc1111111ccccccccccccccccccccc9f94f994f994fff400000000000000000000000000000000
-ccccccccccccccccccccc11ccccccccccccccccccccccccccccccccccccccccccccccccccccccccc000000cc0000000000000000000000000000000000000000
-ccccc11cccccccccccccc161ccccccccccccc11ccccccccccccccccccccccccccccccccccccccccc000000cc0000000000000000000000000000000000000000
-ccccc161ccccccccccc511d55cccccccccccc161cccccccccccccccccccccccccccccccccccccccc000000cc0000000000000000000000000000000000000000
-ccc511d55ccccccccc5666571cccccccccc511d55ccccccccccccccccccccccccccccccccccccccc000000cc0000000000000000000000000000000000000000
-cc5666571cccccccc56776de1ccccccccc5666571ccccccccccccccccccccccccccccccccccccccc000000cc0000000000000000000000000000000000000000
-c56776de1cccccccc577776e5cccccccc56776de1ccccccccccccccccccccccccccccccccccccccc000000cc0000000000000000000000000000000000000000
-c577776e5ccc15ccc176777d5cccc55cc577776e5ccc15cccccccccccccccccccccccccccccccccc000000cc0000000000000000000000000000000000000000
-c176777d5ccc175c116176661ccc175cc176777d5ccc175ccccccccccccccccccccccccccccccccc000000cc0000000000000000000000000000000000000000
-116176661151d75c1777776dd151d75c116176661151d75ccccccccccccccccccccccccccccccccc000000cc0000000000000000000000000000000000000000
-1777776dd7766d1c167766d677766d1c1777776dd7766d1ccccccccccccccccccccccccccccccccc000000cc0000000000000000000000000000000000000000
-167766d67777d5ccc111dd677777d5cc167766d67777d5ccccc1111111111ccccccccccccccccccc000000cc0000000000000000000000000000000000000000
-c111dd67767761cccccc1d77667761ccc111dd67767761cccc111111111111cccccccccccccccccc000000cc0000000000000000000000000000000000000000
-ccc15dd66d66d1ccccccc5676d67d1cccccc1d666d66d1cc111111111111111c1ccccccccccccccc000000cc0000000000000000000000000000000000000000
-cc1d55dd6d6d1ccccccc1dd7d1d61cccccc1d6d515d6d5cc111111111111111c1ccccccccccccccc000000cc0000000000000000000000000000000000000000
-cc111c1d65d1cccccccc1d56156d1cccccc16d1cc15d611cc1111111111111cccccccccccccccccc000000cc0000000000000000000000000000000000000000
-cccccc111c11ccccccc55111c1551cccccc111ccccc111ccccc111111111cccccccccccccccccccc000000cc0000000000000000000000000000000000000000
+ccccccccccccccccccc55ccccc55cccccccccccccccccccccccccccccccccccccccccccccccc00009f94ff94f994ff9488888888888888888888888888888888
+ccc55ccccc55ccccccc165ccc561ccccccc55ccccc55cccccccccccccccccccccccccccccccc0000ff94ff94ff94fff488888888888888888888888888888888
+ccc165ccc561ccccccc1e61516e1ccccccc165ccc561cccccccccccccccccccccccccccccccc0000f9f49f94ff949ff488888888888888888888888888888888
+ccc1e61516e1ccccccc5e67776e5ccccccc1e61516e1cccccccccccccccccccccccccccccccc0000f9f4999444449f9488888888888888888888888888888888
+ccc5e67776e5ccccccc167777761ccccccc5e67776e5cccccccccccccccccccccccccccccccc000099f49994f9f49f9488888888888888888888888888888888
+ccc167777761ccccccc177777771ccccccc167777761cccccccccccccccccccccccccccccccc000099f4f9f4f9f49f9488888888888888888888888888888888
+ccc177777771ccccccc176777671ccccccc177777771cccccccccccccccccccccccccccccccc00004444f9f499f49f948888888888888888c888888888888888
+ccc176777671ccccccc161777161ccccccc176777671cccccccccccccccccccccccccccccccc0000fff4f9f499f49f948888888888888888c888888888888888
+ccc161777161cccccc55776167755cccccc161777161ccccccccccccccccccccccccccccccccccccf9f49ff49ff49ff4888888888888888ccc88888888888888
+cc55776167755cccccc516777615cccccc55776167755cccccccccccccccccccccccccccccccccccf9f49ff49f94444488888888888888ccccc8888888888888
+cc151677761d1ccccc1dd15551dd1ccccc1d167776151ccccccc1111111cccccccccccccccccccccf9949ff49f94f9f48888888888888cccccc8888888888888
+cc15d15551d61ccccc15d77777d51ccccc16d15551d51ccccc11111111111cccccccccccccccccccf994fff4ff94f9f488888888888887777777888888888888
+cc1d6777666d1ccccc1d6677766d1ccccc1d6667776d1cccccc111111111ccccccccccccccccccccf9944444ff94f9f4888888888888cccccccc888888888888
+ccc17d1115d1ccccccc16d111d61ccccccc1d5111d71ccccccc111111111cccccccccccccccccccc9f94f9f4f9f4f9f4888888888887cccccccc788888888888
+ccc176515d51ccccccc1d65156d1ccccccc15d515671cccccccc1111111ccccccccccccccccccccc9f94f9f4f994f9f48888888888c7cccccccc788888888888
+cccc1111111ccccccccc1111111ccccccccc1111111ccccccccc1111111ccccccccccccccccccccc9f94f994f994fff4888888888cc7c3cccccc7c8888888888
+ccccccccccccccccccccc11ccccccccccccccccccccccccccccccccccccccccccccccccccccccccc760606060606060688888888ccc7333ccccc7c8888888888
+ccccc11cccccccccccccc161ccccccccccccc11ccccccccccccccccccccccccccccccccccccccccc6666666666666666888888ccccc7333ccccc7cc888888888
+ccccc161ccccccccccc511d55cccccccccccc161cccccccccccccccccccccccccccccccccccccccc7606060606060606888883ccccc7333ccccc73cc88888888
+ccc511d55ccccccccc5666571cccccccccc511d55ccccccccccccccccccccccccccccccccccccccc6666666666666666888833ccccc7c4cccccc733cc8888888
+cc5666571cccccccc56776de1ccccccccc5666571ccccccccccccccccccccccccccccccccccccccc760606060606060688887777777777777777777777888888
+c56776de1cccccccc577776e5cccccccc56776de1ccccccccccccccccccccccccccccccccccccccc6666666666666666888c4ccbccc7bbbbbbcc733cbbb88888
+c577776e5ccc15ccc176777d5cccc55cc577776e5ccc15cccccccccccccccccccccccccccccccccc0606060606060606887cbbbbbbc7bbbbbbbc74cbbbbb8888
+c176777d5ccc175c116176661ccc175cc176777d5ccc175ccccccccccccccccccccccccccccccccc6666666666666666877bbbbbbbb7bbbbbbbb7bbbbbbbb788
+116176661151d75c1777776dd151d75c116176661151d75ccccccccccccccccccccccccccccccccc0606060606060606777bbbbbbbb7bbbbbbbb7bbbbbbbb778
+1777776dd7766d1c167766d677766d1c1777776dd7766d1ccccccccccccccccccccccccccccccccc6666666666666666777bbbbbbbb7bbbbbbbb7bbbbbbbb777
+167766d67777d5ccc111dd677777d5cc167766d67777d5ccccc1111111111ccccccccccccccccccc0606060606060606777bbbbbbbb7bbbbbbbb7bbbbbbbb777
+c111dd67767761cccccc1d77667761ccc111dd67767761cccc111111111111cccccccccccccccccc6666666666666666777bbbbbbbb7bbbbbbbb7bbbbbbbb777
+ccc15dd66d66d1ccccccc5676d67d1cccccc1d666d66d1cc111111111111111c1ccccccccccccccc0606060606060606777bbbbbbbb7bbbbbbbb7bbbbbbbb777
+cc1d55dd6d6d1ccccccc1dd7d1d61cccccc1d6d515d6d5cc111111111111111c1ccccccccccccccc666666666666666677777777777777777777777777777777
+cc111c1d65d1cccccccc1d56156d1cccccc16d1cc15d611cc1111111111111cccccccccccccccccc060606060606060677777777777777777777777777777777
+cccccc111c11ccccccc55111c1551cccccc111ccccc111ccccc111111111cccccccccccccccccccc666666666666666677777777777777777777777777777777
 ccccccccccccccccccc55ccccc55cccccccccccccccccccccccccccccccccccccccccccccccccccc000000cc0000000000000000000000000000000000000000
 ccc55ccccc55ccccccc165ccc561ccccccc55ccccc55cccccccccccccccccccccccccccccccccccc000000cc0000000000000000000000000000000000000000
 ccc165ccc561ccccccc1e61516e1ccccccc165ccc561cccccccccccccccccccccccccccccccccccc000000cc0000000000000000000000000000000000000000
